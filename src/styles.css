@@ -1,0 +1,160 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-shell: var(--shell);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-navy: var(--navy);
+  --color-leaf: var(--leaf);
+  --font-display: "Sora", system-ui, sans-serif;
+  --font-sans: "Manrope", system-ui, sans-serif;
+  --shadow-frame: 0 40px 90px -30px rgba(7, 46, 92, 0.45);
+  --shadow-glow: 0 12px 40px -10px rgba(7, 154, 10, 0.55);
+}
+
+:root {
+  --radius: 1rem;
+  --shell: #E7F3E4;
+  --background: #FFFFFF;
+  --foreground: #0B2545;
+  --card: #FFFFFF;
+  --card-foreground: #0B2545;
+  --popover: #FFFFFF;
+  --popover-foreground: #0B2545;
+  --primary: #079A0A;
+  --primary-foreground: #FFFFFF;
+  --secondary: #EAF6E6;
+  --secondary-foreground: #072E5C;
+  --muted: #F2F5F1;
+  --muted-foreground: #5B6B7C;
+  --accent: #EAF6E6;
+  --accent-foreground: #072E5C;
+  --destructive: #DC2626;
+  --destructive-foreground: #FFFFFF;
+  --success: #16A34A;
+  --warning: #D97706;
+  --info: #2563EB;
+  --border: #E2E8E0;
+  --input: #D5DED2;
+  --ring: #079A0A;
+  --navy: #072E5C;
+  --leaf: #5FD11A;
+  --chart-1: #079A0A;
+  --chart-2: #072E5C;
+  --chart-3: #5FD11A;
+  --chart-4: #2563EB;
+  --chart-5: #D97706;
+}
+
+@utility bg-app-gradient {
+  background-image: linear-gradient(180deg, #F3FBF0 0%, #FFFFFF 40%);
+}
+
+@utility bg-brand-gradient {
+  background-image: linear-gradient(135deg, #5FD11A 0%, #079A0A 55%, #072E5C 100%);
+}
+
+@utility shadow-frame {
+  box-shadow: var(--shadow-frame);
+}
+
+@utility shadow-glow {
+  box-shadow: var(--shadow-glow);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html,
+  body {
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  body {
+    background-color: var(--color-shell);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+  }
+}
+
+/* ---- Animations ---- */
+@keyframes bt-fade-up { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes bt-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes bt-logo-in { 0% { opacity: 0; transform: scale(.55) rotate(-14deg); } 65% { opacity: 1; transform: scale(1.08) rotate(3deg); } 100% { opacity: 1; transform: scale(1) rotate(0); } }
+@keyframes bt-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+@keyframes bt-ring { 0% { transform: scale(.55); opacity: .9; } 100% { transform: scale(1.35); opacity: 0; } }
+@keyframes bt-bar { from { width: 0; } to { width: 100%; } }
+@keyframes bt-live { 0%, 100% { box-shadow: 0 0 0 0 rgba(31, 138, 76, .55); } 60% { box-shadow: 0 0 0 7px rgba(31, 138, 76, 0); } }
+
+.bt-fade-up { animation: bt-fade-up .55s cubic-bezier(.2, .7, .2, 1) both; }
+.bt-page { animation: bt-fade .35s ease-out both; }
+.bt-live { animation: bt-live 1.8s ease-out infinite; }
+.bt-splash-logo { animation: bt-logo-in .9s cubic-bezier(.2, .8, .2, 1) both, bt-float 3s ease-in-out .9s infinite; }
+.bt-splash-ring { animation: bt-ring 2.2s ease-out infinite; }
+.bt-splash-bar { animation: bt-bar 2.7s cubic-bezier(.3, .1, .3, 1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .bt-fade-up, .bt-page, .bt-live, .bt-splash-logo, .bt-splash-ring, .bt-splash-bar { animation: none !important; }
+}
+
+/* Les enfants directs apparaissent l'un apres l'autre */
+.bt-stagger > * { animation: bt-fade-up .55s cubic-bezier(.2, .7, .2, 1) both; }
+.bt-stagger > *:nth-child(2) { animation-delay: 70ms; }
+.bt-stagger > *:nth-child(3) { animation-delay: 140ms; }
+.bt-stagger > *:nth-child(4) { animation-delay: 210ms; }
+.bt-stagger > *:nth-child(5) { animation-delay: 280ms; }
+.bt-stagger > *:nth-child(6) { animation-delay: 350ms; }
+.bt-stagger > *:nth-child(7) { animation-delay: 420ms; }
+.bt-stagger > *:nth-child(8) { animation-delay: 490ms; }
+.bt-stagger > *:nth-child(n+9) { animation-delay: 560ms; }
+@media (prefers-reduced-motion: reduce) { .bt-stagger > * { animation: none !important; } }
+
+/* Volet qui monte depuis le bas (page GPS) */
+@keyframes bt-sheet-up { from { transform: translateY(36px); opacity: 0; } to { transform: none; opacity: 1; } }
+.bt-sheet { animation: bt-sheet-up .6s cubic-bezier(.2, .8, .2, 1) .15s both; }
+@media (prefers-reduced-motion: reduce) { .bt-sheet { animation: none !important; } }

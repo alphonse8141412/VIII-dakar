@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
+  <rect width="800" height="600" fill="#EEF3EC"/>
+  <g fill="none" stroke="#072E5C" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" opacity=".55">
+    <path d="M330 250h140l-20 170h-100z"/>
+    <path d="M310 250h180M370 250v-25h60v25"/>
+  </g>
+  <text x="400" y="480" text-anchor="middle" font-family="system-ui,sans-serif" font-size="34" font-weight="700" fill="#072E5C">Bountou Pikine</text>
+  <text x="400" y="525" text-anchor="middle" font-family="system-ui,sans-serif" font-size="24" fill="#4B5563">Photo du site à ajouter lors de la vérification</text>
+</svg>
