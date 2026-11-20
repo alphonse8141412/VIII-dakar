@@ -1,52 +1,44 @@
-import { useEffect, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { connexionEquipeFn, deconnexionEquipeFn, statutEquipeFn } from "@/lib/api";
 
 /**
  * Mode équipe (scouts) : débloque la vérification des signalements, la photo « après »
  * et la saisie des pesées.
  *
- * Étape 2 : simple code partagé, gardé sur le téléphone. Ce n'est PAS une protection réelle :
- * à l'étape 4 il sera remplacé par une connexion des membres de l'équipe côté serveur.
+ * Le code est vérifié par le serveur (variable CODE_EQUIPE), qui pose un cookie HttpOnly signé.
+ * Le navigateur ne connaît ni le code ni le secret ; le serveur refuse toute action d'équipe sans cookie valide.
  */
-const CLE = "eco-pikine:equipe";
-const CODE = (import.meta.env.VITE_CODE_EQUIPE as string | undefined) ?? "scout8";
-const EVENEMENT = "eco-pikine:equipe";
-
-function lireActif() {
-  try {
-    return window.localStorage.getItem(CLE) === "1";
-  } catch {
-    return false;
-  }
-}
-
 export function useEquipe() {
-  const [actif, setActif] = useState(false);
+  const qc = useQueryClient();
+  const { data } = useQuery({
+    queryKey: ["equipe"],
+    queryFn: () => statutEquipeFn(),
+    staleTime: 60_000,
+  });
 
-  useEffect(() => {
-    setActif(lireActif());
-    const maj = () => setActif(lireActif());
-    window.addEventListener(EVENEMENT, maj);
-    return () => window.removeEventListener(EVENEMENT, maj);
-  }, []);
+  const connexion = useMutation({
+    mutationFn: (code: string) => connexionEquipeFn({ data: { code } }),
+    onSuccess: (r) => {
+      if (r.ok) qc.setQueryData(["equipe"], { actif: true });
+    },
+  });
 
-  const changer = (v: boolean) => {
-    try {
-      if (v) window.localStorage.setItem(CLE, "1");
-      else window.localStorage.removeItem(CLE);
-    } catch {
-      /* stockage indisponible : le mode reste actif pour cette page seulement */
-    }
-    setActif(v);
-    window.dispatchEvent(new Event(EVENEMENT));
-  };
+  const deconnexion = useMutation({
+    mutationFn: () => deconnexionEquipeFn(),
+    onSuccess: () => qc.setQueryData(["equipe"], { actif: false }),
+  });
 
   return {
-    actif,
-    activer: (code: string) => {
-      const ok = code.trim().toLowerCase() === CODE.toLowerCase();
-      if (ok) changer(true);
-      return ok;
+    actif: data?.actif ?? false,
+    enCours: connexion.isPending,
+    /** Renvoie true si le code est correct. */
+    activer: async (code: string) => {
+      try {
+        return (await connexion.mutateAsync(code)).ok;
+      } catch {
+        return false;
+      }
     },
-    desactiver: () => changer(false),
+    desactiver: () => deconnexion.mutate(),
   };
 }

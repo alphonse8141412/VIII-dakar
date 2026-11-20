@@ -16,6 +16,7 @@ import { Route as CarteRouteImport } from './routes/carte'
 import { Route as InfosRouteImport } from './routes/infos'
 import { Route as PeseesRouteImport } from './routes/pesees'
 import { Route as SignalerRouteImport } from './routes/signaler'
+import { Route as PhotosNomRouteImport } from './routes/photos.$nom'
 import { Route as SiteIdRouteImport } from './routes/site.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -53,6 +54,11 @@ const SignalerRoute = SignalerRouteImport.update({
   path: '/signaler',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PhotosNomRoute = PhotosNomRouteImport.update({
+  id: '/photos/$nom',
+  path: '/photos/$nom',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SiteIdRoute = SiteIdRouteImport.update({
   id: '/site/$id',
   path: '/site/$id',
@@ -67,6 +73,7 @@ export interface FileRoutesByFullPath {
   '/infos': typeof InfosRoute
   '/pesees': typeof PeseesRoute
   '/signaler': typeof SignalerRoute
+  '/photos/$nom': typeof PhotosNomRoute
   '/site/$id': typeof SiteIdRoute
 }
 export interface FileRoutesByTo {
@@ -77,6 +84,7 @@ export interface FileRoutesByTo {
   '/infos': typeof InfosRoute
   '/pesees': typeof PeseesRoute
   '/signaler': typeof SignalerRoute
+  '/photos/$nom': typeof PhotosNomRoute
   '/site/$id': typeof SiteIdRoute
 }
 export interface FileRoutesById {
@@ -88,6 +96,7 @@ export interface FileRoutesById {
   '/infos': typeof InfosRoute
   '/pesees': typeof PeseesRoute
   '/signaler': typeof SignalerRoute
+  '/photos/$nom': typeof PhotosNomRoute
   '/site/$id': typeof SiteIdRoute
 }
 export interface FileRouteTypes {
@@ -100,6 +109,7 @@ export interface FileRouteTypes {
     | '/infos'
     | '/pesees'
     | '/signaler'
+    | '/photos/$nom'
     | '/site/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -110,6 +120,7 @@ export interface FileRouteTypes {
     | '/infos'
     | '/pesees'
     | '/signaler'
+    | '/photos/$nom'
     | '/site/$id'
   id:
     | '__root__'
@@ -120,6 +131,7 @@ export interface FileRouteTypes {
     | '/infos'
     | '/pesees'
     | '/signaler'
+    | '/photos/$nom'
     | '/site/$id'
   fileRoutesById: FileRoutesById
 }
@@ -131,6 +143,7 @@ export interface RootRouteChildren {
   InfosRoute: typeof InfosRoute
   PeseesRoute: typeof PeseesRoute
   SignalerRoute: typeof SignalerRoute
+  PhotosNomRoute: typeof PhotosNomRoute
   SiteIdRoute: typeof SiteIdRoute
 }
 
@@ -185,6 +198,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignalerRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/photos/$nom': {
+      id: '/photos/$nom'
+      path: '/photos/$nom'
+      fullPath: '/photos/$nom'
+      preLoaderRoute: typeof PhotosNomRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/site/$id': {
       id: '/site/$id'
       path: '/site/$id'
@@ -203,6 +223,7 @@ const rootRouteChildren: RootRouteChildren = {
   InfosRoute: InfosRoute,
   PeseesRoute: PeseesRoute,
   SignalerRoute: SignalerRoute,
+  PhotosNomRoute: PhotosNomRoute,
   SiteIdRoute: SiteIdRoute,
 }
 export const routeTree = rootRouteImport

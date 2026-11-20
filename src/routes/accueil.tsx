@@ -1,7 +1,23 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, ChevronRight, CircleCheck, MapPin, Megaphone, Recycle, Star, Target, Trash2 } from "lucide-react";
+import {
+  ArrowRight,
+  ChevronRight,
+  CircleCheck,
+  MapPin,
+  Megaphone,
+  Recycle,
+  Star,
+  Target,
+  Trash2,
+} from "lucide-react";
 import { AppShell, EnTeteProjet } from "@/components/AppShell";
-import { bilanPesees, OBJECTIF_TOTAL_KG, POUBELLES, useSignalements, usePesees } from "@/lib/donnees";
+import {
+  bilanPesees,
+  OBJECTIF_TOTAL_KG,
+  POUBELLES,
+  useSignalements,
+  usePesees,
+} from "@/lib/donnees";
 
 export const Route = createFileRoute("/accueil")({
   head: () => ({
@@ -12,13 +28,18 @@ export const Route = createFileRoute("/accueil")({
 });
 
 /** Premier site repéré dans la demande (section 3.3). */
-const SITE_A_LA_UNE = { quartier: "Bountou Pikine", precision: "près de l'école Notre-Dame du Cap-Vert" };
+const SITE_A_LA_UNE = {
+  quartier: "Bountou Pikine",
+  precision: "près de l'école Notre-Dame du Cap-Vert",
+};
 
 function Accueil() {
   const { data: signalements = [] } = useSignalements();
   const { data: pesees = [] } = usePesees();
   const { kgConformes } = bilanPesees(pesees);
-  const nettoyes = signalements.filter((s) => s.statut === "nettoye" || s.statut === "rehabilite").length;
+  const nettoyes = signalements.filter(
+    (s) => s.statut === "nettoye" || s.statut === "rehabilite",
+  ).length;
   const siteUne = signalements.find((s) => s.quartier === SITE_A_LA_UNE.quartier);
 
   return (
@@ -46,7 +67,9 @@ function Accueil() {
         className="mx-4 mt-4 flex items-center gap-3 rounded-full bg-primary px-6 py-4 text-white shadow-[0_10px_24px_-10px_rgba(7,154,10,0.7)] transition-transform active:scale-[0.98]"
       >
         <Megaphone className="h-7 w-7 shrink-0" fill="currentColor" />
-        <span className="flex-1 text-center font-display text-[19px] font-bold">Signaler un site sale</span>
+        <span className="flex-1 text-center font-display text-[19px] font-bold">
+          Signaler un site sale
+        </span>
         <ChevronRight className="h-6 w-6 shrink-0" strokeWidth={3} />
       </Link>
 
@@ -70,7 +93,9 @@ function Accueil() {
             couleur="text-navy"
           />
           <Chiffre
-            icone={<CircleCheck className="h-7 w-7 text-primary" fill="currentColor" stroke="white" />}
+            icone={
+              <CircleCheck className="h-7 w-7 text-primary" fill="currentColor" stroke="white" />
+            }
             valeur={nettoyes}
             label="Sites nettoyés"
             couleur="text-primary"
@@ -97,10 +122,10 @@ function Accueil() {
         </div>
         <div className="mt-1.5 flex items-center gap-3">
           <img
-            src="/site-une.webp"
-            alt="Fresque « Pikine propre » sur un mur réhabilité"
-            width={600}
-            height={391}
+            src="/site-une-bountou.webp"
+            alt="Mur couvert de graffitis le long d'une rue de Bountou Pikine"
+            width={1200}
+            height={436}
             loading="lazy"
             className="aspect-[3/2] w-[44%] shrink-0 rounded-2xl object-cover"
           />
@@ -129,7 +154,11 @@ function Anneau({ kg }: { kg: number }) {
   const kgAffiche = kg.toLocaleString("fr-FR", { maximumFractionDigits: kg < 10 ? 1 : 0 });
   return (
     <div className="flex flex-col items-center border-r border-navy/30 pr-2 text-center">
-      <div className="relative h-[72px] w-[72px]" role="img" aria-label={`${Math.round(p * 100)} % de l'objectif atteint`}>
+      <div
+        className="relative h-[72px] w-[72px]"
+        role="img"
+        aria-label={`${Math.round(p * 100)} % de l'objectif atteint`}
+      >
         <svg viewBox="0 0 72 72" className="h-full w-full -rotate-90">
           <circle cx="36" cy="36" r={r} fill="none" stroke="#E2E8E0" strokeWidth="7" />
           <circle
@@ -147,7 +176,9 @@ function Anneau({ kg }: { kg: number }) {
         </svg>
         <Recycle className="absolute inset-0 m-auto h-7 w-7 text-primary" strokeWidth={2.6} />
       </div>
-      <p className="mt-1 font-display text-[22px] leading-none font-bold text-primary">{kgAffiche} kg</p>
+      <p className="mt-1 font-display text-[22px] leading-none font-bold text-primary">
+        {kgAffiche} kg
+      </p>
       <p className="mt-0.5 text-[12px] text-primary">Collectés</p>
     </div>
   );

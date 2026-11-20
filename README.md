@@ -20,5 +20,25 @@ npm i
 npm run dev
 ```
 
-Code équipe par défaut : `scout8` (variable `VITE_CODE_EQUIPE`). Les données sont pour l'instant
-stockées dans le navigateur (`src/lib/donnees.ts`) ; elles passeront sur un stockage partagé à l'étape 4.
+En développement, le code équipe est `scout8` et les données vont dans `./donnees-serveur/`.
+
+## Serveur (VPS)
+Les données sont partagées entre tous les téléphones : base SQLite (`node:sqlite`, Node ≥ 22.5)
+et photos JPEG sur le disque, dans `DOSSIER_DONNEES`.
+
+```sh
+npm ci && npm run build
+CODE_EQUIPE='...' SECRET_SESSION='une-longue-chaine-aleatoire' \
+DOSSIER_DONNEES=/var/lib/eco-pikine PORT=3000 npm start
+```
+
+| Variable | Rôle |
+| --- | --- |
+| `CODE_EQUIPE` | Code du mode équipe, vérifié par le serveur (obligatoire en production) |
+| `SECRET_SESSION` | Clé de signature du cookie équipe (obligatoire, 32 caractères ou plus) |
+| `DOSSIER_DONNEES` | Dossier de la base et des photos (à sauvegarder) |
+| `DONNEES_DEMO=1` | Ajoute les données de démonstration à la création de la base |
+| `PORT` | Port d'écoute (3000 par défaut) |
+
+Mettez l'app derrière Caddy ou Nginx en **https** : sans https, la caméra et le GPS sont bloqués
+par les téléphones. Sauvegarde : copier `DOSSIER_DONNEES` (base + photos).

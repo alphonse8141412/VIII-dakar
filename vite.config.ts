@@ -12,12 +12,6 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
-  vite: {
-    server: {
-      // En developpement, /api/* est envoye a l'API Boussole (comme vercel.json en production)
-      proxy: {
-        "/api": { target: "http://209.38.68.161:8001", changeOrigin: true },
-      },
-    },
-  },
+  // Serveur Node autonome pour le VPS (SQLite + photos sur disque) : `node .output/server/index.mjs`
+  nitro: { preset: "node-server" },
 });

@@ -5,7 +5,7 @@ import { CarteSection } from "@/components/AppShell";
 import { useEquipe } from "@/lib/equipe";
 
 export function ModeEquipe() {
-  const { actif, activer, desactiver } = useEquipe();
+  const { actif, activer, desactiver, enCours } = useEquipe();
   const [code, setCode] = useState("");
 
   if (actif) {
@@ -28,9 +28,9 @@ export function ModeEquipe() {
   return (
     <CarteSection icone={<Users />} titre="Espace équipe scouts">
       <form
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault();
-          if (activer(code)) {
+          if (await activer(code)) {
             toast.success("Mode équipe activé");
             setCode("");
           } else toast.error("Code incorrect");
@@ -50,7 +50,8 @@ export function ModeEquipe() {
           />
           <button
             type="submit"
-            className="rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-white shadow-[0_8px_18px_-8px_rgba(7,154,10,0.7)] active:scale-[0.97]"
+            disabled={enCours}
+            className="rounded-full disabled:opacity-60 bg-primary px-5 py-2.5 text-sm font-bold text-white shadow-[0_8px_18px_-8px_rgba(7,154,10,0.7)] active:scale-[0.97]"
           >
             Entrer
           </button>

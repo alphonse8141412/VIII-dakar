@@ -73,7 +73,7 @@ function Pesees() {
                       type="button"
                       aria-label="Supprimer"
                       onClick={() => {
-                        if (confirm("Supprimer ce relevé ?")) supprimer.mutate(p.id);
+                        if (confirm("Supprimer ce relevé ?")) supprimer.mutate(p.id, { onError: (e) => toast.error(e.message) });
                       }}
                       className="grid h-8 w-8 place-items-center rounded-full text-muted-foreground hover:bg-red-50 hover:text-red-600"
                     >
@@ -106,14 +106,18 @@ function FormulairePesee() {
     e.preventDefault();
     if (!(kgC >= 0) || conformes === "" || !(kgR >= 0)) return toast.error("Poids invalide");
     if (kgC + kgR > 50) return toast.error("Plus de 50 kg : le peson ne dépasse pas 50 kg, pesez en plusieurs fois.");
-    await ajouter.mutateAsync({
-      date,
-      volet,
-      lieu,
-      kg_conformes: kgC,
-      kg_retires: kgR,
-      saisi_par: saisiPar.trim() || "Équipe terrain",
-    });
+    try {
+      await ajouter.mutateAsync({
+        date,
+        volet,
+        lieu,
+        kg_conformes: kgC,
+        kg_retires: kgR,
+        saisi_par: saisiPar.trim() || "Équipe terrain",
+      });
+    } catch (e) {
+      return toast.error((e as Error).message);
+    }
     toast.success(`${formatKg(kgC)} enregistrés`);
     setConformes("");
     setRetires("");

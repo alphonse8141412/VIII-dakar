@@ -16,6 +16,9 @@ dist-ssr
 .nitro
 *.local
 
+# Base SQLite et photos du serveur (à sauvegarder, jamais à committer)
+donnees-serveur/
+
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars
