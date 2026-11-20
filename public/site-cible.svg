@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300">
+  <rect width="400" height="300" fill="#E8F1FE"/>
+  <g fill="none" stroke="#BFD6FB" stroke-width="2">
+    <path d="M0 210 Q100 180 200 205 T400 195"/>
+    <path d="M0 240 Q120 215 220 238 T400 228"/>
+    <path d="M60 0v300M160 0v300M260 0v300M360 0v300" stroke-dasharray="4 8"/>
+  </g>
+  <g transform="translate(200 118)">
+    <circle r="52" fill="#DBEAFE"/>
+    <circle r="40" fill="none" stroke="#1D4ED8" stroke-width="7"/>
+    <circle r="24" fill="none" stroke="#3B82F6" stroke-width="7"/>
+    <circle r="9" fill="#1D4ED8"/>
+  </g>
+  <text x="200" y="222" text-anchor="middle" font-family="Sora, Manrope, sans-serif" font-size="24" font-weight="700" fill="#072E5C">Site cible</text>
+  <text x="200" y="250" text-anchor="middle" font-family="Manrope, sans-serif" font-size="16" fill="#1D4ED8">Photo à prendre sur le terrain</text>
+</svg>

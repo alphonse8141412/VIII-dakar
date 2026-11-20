@@ -7,6 +7,7 @@ import { CarteSites } from "@/components/CarteSites";
 import { useEquipe } from "@/lib/equipe";
 import {
   compresserPhoto,
+  estCible,
   formatDate,
   GALERIES_AVANT,
   GRAVITES,
@@ -53,6 +54,7 @@ function FicheSite() {
   const photoAvant = photosAvant[photoChoisie] ?? photosAvant[0];
   const st = STATUTS[s.statut];
   const etape = ORDRE_STATUTS.indexOf(s.statut);
+  const cible = estCible(s);
 
   const changerStatut = async (statut: Statut) => {
     if ((statut === "nettoye" || statut === "rehabilite") && !s.photo_apres) {
@@ -62,6 +64,17 @@ function FicheSite() {
     try {
       await maj.mutateAsync({ id: s.id, statut });
       toast.success(`Statut : ${STATUTS[statut].label}`);
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
+  };
+
+  /** Site cible : la vraie photo « avant », prise sur le terrain par l'équipe. */
+  const ajouterPhotoAvant = async (f: File | undefined) => {
+    if (!f) return;
+    try {
+      await maj.mutateAsync({ id: s.id, photo_avant: await compresserPhoto(f) });
+      toast.success("Photo « avant » ajoutée");
     } catch (e) {
       toast.error((e as Error).message);
     }
@@ -90,7 +103,9 @@ function FicheSite() {
           </Link>
           <div className="min-w-0 flex-1">
             <h1 className="truncate font-display text-[18px] font-bold text-navy">{s.quartier}</h1>
-            <p className="text-[12px] text-muted-foreground">Signalé le {formatDate(s.cree_le)}</p>
+            <p className="text-[12px] text-muted-foreground">
+              {cible ? "Site cible du projet" : `Signalé le ${formatDate(s.cree_le)}`}
+            </p>
           </div>
           <span
             className="rounded-full px-3 py-1 text-xs font-bold"
@@ -161,11 +176,13 @@ function FicheSite() {
         </ol>
       </section>
 
-      {/* Détails */}
-      <section className="mx-4 mt-3 grid grid-cols-2 gap-2">
-        <Info label="Déchets" valeur={TYPES_DECHET[s.type_dechet]} />
-        <Info label="Gravité" valeur={GRAVITES[s.gravite]} />
-      </section>
+      {/* Détails (un site cible n'a pas encore été observé : ni type de déchets ni gravité) */}
+      {!cible && (
+        <section className="mx-4 mt-3 grid grid-cols-2 gap-2">
+          <Info label="Déchets" valeur={TYPES_DECHET[s.type_dechet]} />
+          <Info label="Gravité" valeur={GRAVITES[s.gravite]} />
+        </section>
+      )}
       {s.commentaire && (
         <p className="mx-4 mt-3 rounded-2xl bg-muted p-3.5 text-sm text-navy">
           « {s.commentaire} »
@@ -188,6 +205,23 @@ function FicheSite() {
       {equipe ? (
         <section className="mx-4 mt-5 rounded-2xl border-2 border-primary/30 bg-secondary p-4">
           <h2 className="text-[14px] font-bold text-navy">Actions de l'équipe</h2>
+          {cible && (
+            <label className="mt-3 flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-white py-3 text-sm font-semibold text-navy">
+              {maj.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Camera className="h-4 w-4" />
+              )}
+              Ajouter la photo « avant »
+              <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="sr-only"
+                onChange={(e) => ajouterPhotoAvant(e.target.files?.[0])}
+              />
+            </label>
+          )}
           <label className="mt-3 flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-white py-3 text-sm font-semibold text-navy">
             {maj.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -204,7 +238,9 @@ function FicheSite() {
             />
           </label>
           <div className="mt-2 grid grid-cols-3 gap-2">
-            {(["verifie", "nettoye", "rehabilite"] as Statut[]).map((k) => (
+            {(
+              (cible ? ["signale", "verifie"] : ["verifie", "nettoye", "rehabilite"]) as Statut[]
+            ).map((k) => (
               <button
                 key={k}
                 type="button"

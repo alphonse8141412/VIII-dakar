@@ -18,6 +18,7 @@ import {
 import { AppShell, Bandeau, CarteSection, EnTeteProjet } from "@/components/AppShell";
 import {
   bilanPesees,
+  estCible,
   formatKg,
   OBJECTIF_CONFORMITE,
   OBJECTIF_TOTAL_KG,
@@ -44,6 +45,7 @@ const ICONES_VOLETS: Record<Volet, React.ReactNode> = {
 
 /** Mêmes icônes que les filtres de la carte. */
 const ICONES_STATUTS: Record<Statut, React.ReactNode> = {
+  cible: <Target className="h-5 w-5" strokeWidth={2.4} />,
   signale: <TriangleAlert className="h-5 w-5" fill="currentColor" stroke="white" />,
   verifie: <HardHat className="h-5 w-5" strokeWidth={2.4} />,
   nettoye: <CircleCheck className="h-5 w-5" fill="currentColor" stroke="white" />,
@@ -55,18 +57,21 @@ function Bilan() {
   const { data: signalements = [] } = useSignalements();
   const b = bilanPesees(pesees);
 
+  const cibles = signalements.filter(estCible).length;
   const parQuartier = Object.entries(
-    signalements.reduce<Record<string, number>>(
-      (acc, s) => ((acc[s.quartier] = (acc[s.quartier] ?? 0) + 1), acc),
-      {},
-    ),
+    signalements
+      .filter((s) => !estCible(s))
+      .reduce<Record<string, number>>(
+        (acc, s) => ((acc[s.quartier] = (acc[s.quartier] ?? 0) + 1), acc),
+        {},
+      ),
   )
     .map(([quartier, n]) => ({ quartier, n }))
     .sort((a, z) => z.n - a.n);
   const maxQuartier = Math.max(1, ...parQuartier.map((q) => q.n));
 
   return (
-    <AppShell>
+    <AppShell largeur="large">
       <EnTeteProjet />
 
       <Bandeau
@@ -84,7 +89,7 @@ function Bilan() {
         }
       />
 
-      <div className="relative -mt-3 flex flex-col gap-3 px-3">
+      <div className="relative -mt-3 flex flex-col gap-3 px-3 lg:block lg:columns-2 lg:gap-4 lg:px-7 lg:[&>*]:mb-4 lg:[&>*]:break-inside-avoid">
         {/* Total */}
         <CarteSection
           icone={<Recycle />}
@@ -185,6 +190,13 @@ function Bilan() {
               </div>
             ))}
           </div>
+          {cibles > 0 && (
+            <p className="mt-2.5 flex items-center gap-1.5 text-[12px] font-semibold text-[#1D4ED8]">
+              <Target className="h-4 w-4" strokeWidth={2.4} />
+              {cibles} site{cibles > 1 ? "s" : ""} cible{cibles > 1 ? "s" : ""} à vérifier sur le
+              terrain
+            </p>
+          )}
         </CarteSection>
 
         {/* Par quartier */}
@@ -291,7 +303,7 @@ function Anneau({ taux }: { taux: number | null }) {
       </svg>
       <span className="absolute inset-0 flex flex-col items-center justify-center">
         <span
-          className={`font-display text-[20px] leading-none font-bold ${ok ? "text-primary" : "text-navy"}`}
+          className={`font-display leading-none font-bold whitespace-nowrap ${taux != null && taux >= 0.995 ? "text-[16px]" : "text-[20px]"} ${ok ? "text-primary" : "text-navy"}`}
         >
           {taux == null ? "—" : `${Math.round(taux * 100)} %`}
         </span>

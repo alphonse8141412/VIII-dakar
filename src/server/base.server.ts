@@ -6,13 +6,13 @@
  *   TURSO_DATABASE_URL  adresse de la base Turso (libsql://…) — obligatoire sur Vercel
  *   TURSO_AUTH_TOKEN    jeton d'accès à la base Turso
  *   DOSSIER_DONNEES     sans Turso : dossier de la base et des photos (défaut : ./donnees-serveur)
- *   DONNEES_DEMO=1      ajoute les données de démonstration à la création de la base
+ *   DONNEES_DEMO=1      ajoute des pesées de démonstration à la création de la base
  */
 import { createClient, type Client, type InStatement } from "@libsql/client";
 import { mkdirSync } from "node:fs";
 import { resolve, join } from "node:path";
 import { pathToFileURL } from "node:url";
-import { PESEES_DEMO, SIGNALEMENTS_DEMO, SITE_BOUNTOU } from "./amorce.server";
+import { PESEES_DEMO, SITES_CIBLES, SITE_BOUNTOU } from "./amorce.server";
 import type { Pesee, Signalement } from "@/lib/types";
 
 /** Sur Vercel, le disque est temporaire : la base doit être sur Turso. */
@@ -72,14 +72,17 @@ async function preparer(): Promise<Client> {
   const c = connexion();
   await c.batch(SCHEMA, "write");
   await amorcer(c);
-  // Bases déjà créées : vraie photo de Bountou et coordonnées exactes des sites
+  // Bases déjà créées : sites cibles, vraie photo de Bountou et coordonnées exactes des sites
   await c.batch(
     [
+      // Anciens points de démonstration aux mêmes endroits, jamais modifiés : remplacés par les sites cibles
+      "DELETE FROM signalements WHERE id LIKE 'demo-s%' AND statut = 'signale' AND photo_apres IS NULL",
+      ...SITES_CIBLES.map(insertionSignalement),
       {
         sql: "UPDATE signalements SET photo_avant = ? WHERE id = ? AND photo_avant = '/bountou-avant.svg'",
         args: [SITE_BOUNTOU.photo_avant, SITE_BOUNTOU.id],
       },
-      ...[SITE_BOUNTOU, ...SIGNALEMENTS_DEMO].map((s) => ({
+      ...[SITE_BOUNTOU, ...SITES_CIBLES].map((s) => ({
         sql: "UPDATE signalements SET lat = ?, lon = ? WHERE id = ?",
         args: [s.lat, s.lon, s.id],
       })),
@@ -96,7 +99,7 @@ async function amorcer(c: Client) {
   const demo = process.env.DONNEES_DEMO === "1";
   await c.batch(
     [
-      ...[SITE_BOUNTOU, ...(demo ? SIGNALEMENTS_DEMO : [])].map(insertionSignalement),
+      insertionSignalement(SITE_BOUNTOU),
       ...(demo ? PESEES_DEMO.map(insertionPesee) : []),
       {
         sql: "INSERT OR IGNORE INTO reglages (cle, valeur) VALUES ('amorce', ?)",
@@ -168,16 +171,17 @@ export async function insererSignalement(s: Signalement) {
 
 export async function modifierSignalement(
   id: string,
-  modif: { statut?: Signalement["statut"]; photo_apres?: string | null },
+  modif: { statut?: Signalement["statut"]; photo_avant?: string; photo_apres?: string | null },
 ): Promise<Signalement> {
   const actuel = await lireSignalement(id);
   if (!actuel) throw new Error("Site introuvable");
   await (
     await db()
   ).execute({
-    sql: "UPDATE signalements SET statut = ?, photo_apres = ?, maj_le = ? WHERE id = ?",
+    sql: "UPDATE signalements SET statut = ?, photo_avant = ?, photo_apres = ?, maj_le = ? WHERE id = ?",
     args: [
       modif.statut ?? actuel.statut,
+      modif.photo_avant ?? actuel.photo_avant,
       modif.photo_apres !== undefined ? modif.photo_apres : actuel.photo_apres,
       new Date().toISOString(),
       id,

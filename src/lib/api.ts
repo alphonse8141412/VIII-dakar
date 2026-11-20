@@ -66,16 +66,18 @@ const schemaMaj = z
   .object({
     id: z.string().min(1).max(64),
     statut: statut.optional(),
+    photo_avant: photo.optional(), // vraie photo d'un site cible, prise par l'équipe
     photo_apres: photo.optional(),
   })
-  .refine((d) => d.statut || d.photo_apres, "Rien à modifier");
+  .refine((d) => d.statut || d.photo_avant || d.photo_apres, "Rien à modifier");
 
 export const majSignalementFn = createServerFn({ method: "POST" })
   .validator(valider(schemaMaj))
   .handler(async ({ data }) => {
     exigerEquipe();
+    const photo_avant = data.photo_avant ? await enregistrerPhoto(data.photo_avant) : undefined;
     const photo_apres = data.photo_apres ? await enregistrerPhoto(data.photo_apres) : undefined;
-    return modifierSignalement(data.id, { statut: data.statut, photo_apres });
+    return modifierSignalement(data.id, { statut: data.statut, photo_avant, photo_apres });
   });
 
 // ---------- Pesées ----------

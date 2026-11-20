@@ -52,6 +52,7 @@ const VOLETS = [
 
 /** Mêmes icônes que la carte et le suivi. */
 const ICONES_STATUTS: Record<Statut, React.ReactNode> = {
+  cible: <Target className="h-4 w-4" strokeWidth={2.4} />,
   signale: <TriangleAlert className="h-4 w-4" fill="currentColor" stroke="white" />,
   verifie: <HardHat className="h-4 w-4" strokeWidth={2.4} />,
   nettoye: <CircleCheck className="h-4 w-4" fill="currentColor" stroke="white" />,
@@ -59,6 +60,7 @@ const ICONES_STATUTS: Record<Statut, React.ReactNode> = {
 };
 
 const ETAPES_STATUTS: Record<Statut, string> = {
+  cible: "Site repéré par le projet, à vérifier sur le terrain.",
   signale: "Un habitant envoie photo et position.",
   verifie: "L'équipe scout confirme sur place.",
   nettoye: "Le site est nettoyé, photo « après » ajoutée.",
@@ -135,7 +137,7 @@ function Infos() {
               aria-hidden="true"
               className="absolute top-3 bottom-3 left-[17px] w-0.5 rounded-full bg-[#E2E8E0]"
             />
-            {ORDRE_STATUTS.map((st) => (
+            {(["cible", ...ORDRE_STATUTS] as Statut[]).map((st) => (
               <li key={st} className="relative flex items-center gap-3">
                 <span
                   className="grid h-8 w-8 shrink-0 place-items-center rounded-full ring-4 ring-white"

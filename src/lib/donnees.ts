@@ -54,8 +54,12 @@ export function useCreerSignalement() {
 export function useMajSignalement() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (modif: { id: string; statut?: Statut; photo_apres?: string }) =>
-      majSignalementFn({ data: modif }).catch(messageLisible("La modification a échoué")),
+    mutationFn: (modif: {
+      id: string;
+      statut?: Statut;
+      photo_avant?: string;
+      photo_apres?: string;
+    }) => majSignalementFn({ data: modif }).catch(messageLisible("La modification a échoué")),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["signalements"] }),
   });
 }

@@ -2,7 +2,8 @@
 
 // ---------- Types ----------
 
-export type Statut = "signale" | "verifie" | "nettoye" | "rehabilite";
+/** « cible » : site repéré par le projet, pas encore signalé ni pris en charge (bleu sur la carte). */
+export type Statut = "cible" | "signale" | "verifie" | "nettoye" | "rehabilite";
 export type TypeDechet = "plastique" | "menagers" | "gravats" | "mixte";
 export type Gravite = 1 | 2 | 3;
 export type Volet = "ecoles" | "espaces_publics" | "nettoyage";
@@ -35,12 +36,19 @@ export type Pesee = {
 // ---------- Référentiels issus de la demande de microsubvention ----------
 
 export const STATUTS: Record<Statut, { label: string; couleur: string; fonce: string }> = {
+  cible: { label: "Site cible", couleur: "#60A5FA", fonce: "#1D4ED8" },
   signale: { label: "Signalé", couleur: "#F87171", fonce: "#B91C1C" },
   verifie: { label: "Vérifié", couleur: "#FBBF24", fonce: "#B45309" },
   nettoye: { label: "Nettoyé", couleur: "#4ADE80", fonce: "#15803D" },
-  rehabilite: { label: "Réhabilité", couleur: "#60A5FA", fonce: "#1D4ED8" },
+  rehabilite: { label: "Réhabilité", couleur: "#A78BFA", fonce: "#6D28D9" },
 };
+/** Étapes du suivi d'un site signalé (un site cible n'a encore franchi aucune étape). */
 export const ORDRE_STATUTS: Statut[] = ["signale", "verifie", "nettoye", "rehabilite"];
+
+export const estCible = (s: { statut: Statut }) => s.statut === "cible";
+
+/** Photo provisoire d'un site cible, remplacée par la vraie photo « avant » de l'équipe. */
+export const PHOTO_SITE_CIBLE = "/site-cible.svg";
 
 export const TYPES_DECHET: Record<TypeDechet, string> = {
   plastique: "Plastique",
@@ -55,14 +63,21 @@ export const GRAVITES: Record<Gravite, string> = {
   3: "Forte",
 };
 
-/** Objectifs du tableau « Résultats du projet » (section 7). */
+/**
+ * Objectifs du projet (nouveau calcul, 6 semaines de collecte) :
+ *   Écoles                4 établissements × 1,5 kg par semaine × 6 semaines (≈ 1 440 bouteilles) = 36 kg
+ *   Espaces publics       20 poubelles × 0,3 kg par semaine × 6 semaines                         = 36 kg
+ *   Journées de nettoyage 2 journées × 100 volontaires × 0,15 kg                                 = 30 kg
+ *   Total                 102 kg, arrondi à 100 kg
+ */
 export const VOLETS: Record<Volet, { label: string; objectif_kg: number }> = {
-  ecoles: { label: "Écoles", objectif_kg: 150 },
-  espaces_publics: { label: "Espaces publics", objectif_kg: 324 },
-  nettoyage: { label: "Journées de nettoyage", objectif_kg: 150 },
+  ecoles: { label: "Écoles", objectif_kg: 36 },
+  espaces_publics: { label: "Espaces publics", objectif_kg: 36 },
+  nettoyage: { label: "Journées de nettoyage", objectif_kg: 30 },
 };
-export const OBJECTIF_TOTAL_KG = 600;
-export const SEUIL_MINIMUM_KG = 300;
+export const OBJECTIF_TOTAL_KG = 100;
+/** Seuil minimum affiché sur la jauge : la moitié de l'objectif. */
+export const SEUIL_MINIMUM_KG = 50;
 export const OBJECTIF_CONFORMITE = 0.8;
 
 export const ECOLES = [
@@ -71,8 +86,9 @@ export const ECOLES = [
   "Fadilou Diop",
   "Notre-Dame du Cap-Vert",
 ];
+/** 20 poubelles à plastique dans les espaces publics. */
 export const POUBELLES = Array.from(
-  { length: 200 },
+  { length: 20 },
   (_, i) => `Poubelle P${String(i + 1).padStart(3, "0")}`,
 );
 

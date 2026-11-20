@@ -1,12 +1,10 @@
 /** Données d'amorçage de la base : le site de Bountou (toujours) et la démonstration (DONNEES_DEMO=1). */
 import {
+  PHOTO_SITE_CIBLE,
   PHOTOS_AVANT_BOUNTOU,
   POSITION_BOUNTOU,
-  type Gravite,
   type Pesee,
   type Signalement,
-  type Statut,
-  type TypeDechet,
   type Volet,
 } from "@/lib/types";
 
@@ -27,92 +25,50 @@ export const SITE_BOUNTOU: Signalement = {
   statut: "verifie",
 };
 
-// ---------- Données simulées (démonstration) ----------
+// ---------- Sites cibles ----------
 
-/** Données fictives pour présenter la plateforme avant le terrain (activées par DONNEES_DEMO=1). */
-const PHOTO_DEMO = "/exemple-site-sale.svg";
-
-const jour = (j: string) => `${j}T09:00:00.000Z`;
-
-/** Positions exactes de chaque secteur (centre de commune / point côtier officiel). */
-export const SIGNALEMENTS_DEMO: Signalement[] = [
+/**
+ * Sites cibles du projet : repérés à l'avance, pas encore signalés ni pris en charge.
+ * Bleus sur la carte jusqu'à ce que l'équipe les passe à « Signalé » ou « Vérifié ».
+ * Positions exactes de chaque secteur (centre de commune / point côtier officiel).
+ */
+export const SITES_CIBLES: Signalement[] = (
   [
-    "demo-s1",
-    "2026-10-27",
-    14.755999,
-    -17.389165,
-    "Pikine Est",
-    "plastique",
-    2,
-    "signale",
-    "Sacs plastiques le long du canal.",
-  ],
-  [
-    "demo-s3",
-    "2026-11-03",
-    14.760463,
-    -17.395533,
-    "Pikine Nord",
-    "mixte",
-    2,
-    "signale",
-    "Terrain vague utilisé comme décharge.",
-  ],
-  [
-    "demo-s5",
-    "2026-11-10",
-    14.74122,
-    -17.37497,
-    "Thiaroye",
-    "gravats",
-    2,
-    "signale",
-    "Gravats et plastiques en bord de route.",
-  ],
-  [
-    "demo-s8",
-    "2026-11-17",
-    14.734063,
-    -17.412187,
-    "Plage de Pikine",
-    "plastique",
-    3,
-    "signale",
-    "Déchets plastiques ramenés par la mer.",
-  ],
-].map(([id, date, lat, lon, quartier, type_dechet, gravite, statut, commentaire]) => ({
-  id: id as string,
-  cree_le: jour(date as string),
-  maj_le: jour(date as string),
-  lat: lat as number,
-  lon: lon as number,
-  quartier: quartier as string,
-  type_dechet: type_dechet as TypeDechet,
-  gravite: gravite as Gravite,
-  commentaire: commentaire as string,
-  photo_avant: PHOTO_DEMO,
+    ["cible-pikine-est", 14.755999, -17.389165, "Pikine Est"],
+    ["cible-pikine-nord", 14.760463, -17.395533, "Pikine Nord"],
+    ["cible-thiaroye", 14.74122, -17.37497, "Thiaroye"],
+    ["cible-plage-pikine", 14.734063, -17.412187, "Plage de Pikine"],
+  ] as const
+).map(([id, lat, lon, quartier]) => ({
+  id,
+  cree_le: "2026-11-19T00:00:00.000Z",
+  maj_le: "2026-11-19T00:00:00.000Z",
+  lat,
+  lon,
+  quartier,
+  type_dechet: "mixte",
+  gravite: 2,
+  commentaire: "Site cible du projet — à vérifier sur le terrain.",
+  photo_avant: PHOTO_SITE_CIBLE,
   photo_apres: null,
-  statut: statut as Statut,
+  statut: "cible",
 }));
 
+// ---------- Données simulées (démonstration) ----------
+
+/** Pesées fictives pour présenter la plateforme avant le terrain (activées par DONNEES_DEMO=1). */
 export const PESEES_DEMO: Pesee[] = [
-  // Écoles (objectif 150 kg)
-  ["2026-10-28", "ecoles", "Pikine Sud", 11.5, 1.5],
-  ["2026-10-29", "ecoles", "Mame Yelli Badiane", 9, 2],
-  ["2026-11-04", "ecoles", "Fadilou Diop", 12.5, 1],
-  ["2026-11-05", "ecoles", "Notre-Dame du Cap-Vert", 14, 2.5],
-  ["2026-11-11", "ecoles", "Pikine Sud", 13, 1.5],
-  ["2026-11-12", "ecoles", "Mame Yelli Badiane", 10.5, 2],
-  ["2026-11-18", "ecoles", "Fadilou Diop", 12, 1],
-  ["2026-11-18", "ecoles", "Notre-Dame du Cap-Vert", 15.5, 2],
-  // Espaces publics (objectif 324 kg)
-  ["2026-10-31", "espaces_publics", "Poubelle P001", 18, 4],
-  ["2026-11-01", "espaces_publics", "Poubelle P014", 15.5, 3],
-  ["2026-11-07", "espaces_publics", "Poubelle P027", 21, 5.5],
-  ["2026-11-08", "espaces_publics", "Poubelle P052", 17, 2.5],
-  ["2026-11-14", "espaces_publics", "Poubelle P088", 19.5, 4],
-  ["2026-11-15", "espaces_publics", "Poubelle P103", 16, 3.5],
-  ["2026-11-19", "espaces_publics", "Poubelle P140", 22.5, 4.5],
+  // Écoles (objectif 36 kg : 4 établissements × 1,5 kg par semaine)
+  ["2026-11-04", "ecoles", "Pikine Sud", 1.4, 0.2],
+  ["2026-11-05", "ecoles", "Mame Yelli Badiane", 1.2, 0.3],
+  ["2026-11-11", "ecoles", "Fadilou Diop", 1.6, 0.1],
+  ["2026-11-12", "ecoles", "Notre-Dame du Cap-Vert", 1.5, 0.2],
+  ["2026-11-18", "ecoles", "Pikine Sud", 1.5, 0.2],
+  // Espaces publics (objectif 36 kg : 20 poubelles × 0,3 kg par semaine)
+  ["2026-11-07", "espaces_publics", "Poubelle P003", 0.3, 0.1],
+  ["2026-11-08", "espaces_publics", "Poubelle P011", 0.4, 0.1],
+  ["2026-11-14", "espaces_publics", "Poubelle P017", 0.3, 0],
+  ["2026-11-19", "espaces_publics", "Poubelle P020", 0.25, 0.05],
 ].map(([date, volet, lieu, kg_conformes, kg_retires], i) => ({
   id: `demo-p${i + 1}`,
   date: date as string,

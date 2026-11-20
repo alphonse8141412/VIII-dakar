@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import type { Map as LMap, LayerGroup, Marker } from "leaflet";
 import leafletCss from "leaflet/dist/leaflet.css?url";
-import { Check, HardHat, Sparkles, Trash2 } from "lucide-react";
+import { Check, HardHat, Sparkles, Target, Trash2 } from "lucide-react";
 import { CENTRE_PIKINE, STATUTS, type Signalement, type Statut } from "@/lib/donnees";
 
 export type MaPosition = { lat: number; lon: number; precision: number };
@@ -11,6 +11,7 @@ export type MaPosition = { lat: number; lon: number; precision: number };
 const ICONES: Record<Statut, string> = Object.fromEntries(
   (
     [
+      ["cible", Target],
       ["signale", Trash2],
       ["verifie", HardHat],
       ["nettoye", Check],
@@ -21,10 +22,11 @@ const ICONES: Record<Statut, string> = Object.fromEntries(
 
 /** Couleurs des marqueurs (le jaune de la maquette pour « en cours »). */
 const COULEURS: Record<Statut, [string, string]> = {
+  cible: ["#3B82F6", "#1D4ED8"],
   signale: ["#F04438", "#C81E1E"],
   verifie: ["#FACC15", "#D9A400"],
   nettoye: ["#16A34A", "#0B7A2E"],
-  rehabilite: ["#3B82F6", "#1D4ED8"],
+  rehabilite: ["#8B5CF6", "#6D28D9"],
 };
 
 function htmlMarqueur(statut: Statut, choisi: boolean) {
