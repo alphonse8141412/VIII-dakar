@@ -1,4 +1,9 @@
-/** Photos des sites : reçues en JPEG (data URL), enregistrées en fichiers et servies par /photos/<nom>. */
+/**
+ * Photos des sites : reçues en JPEG (data URL).
+ * Production (Vercel) : envoyées vers Vercel Blob (BLOB_READ_WRITE_TOKEN), qui renvoie une adresse publique.
+ * Sans Blob (développement, VPS) : enregistrées en fichiers et servies par /photos/<nom>.
+ */
+import { put } from "@vercel/blob";
 import { randomUUID } from "node:crypto";
 import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
@@ -18,6 +23,16 @@ export async function enregistrerPhoto(dataUrl: string): Promise<string> {
   if (octets[0] !== 0xff || octets[1] !== 0xd8 || octets[2] !== 0xff)
     throw new Error("Fichier photo invalide.");
   const nom = `${randomUUID()}.jpg`;
+  if (process.env.BLOB_READ_WRITE_TOKEN) {
+    const blob = await put(`photos/${nom}`, octets, {
+      access: "public",
+      contentType: "image/jpeg",
+      addRandomSuffix: false,
+      cacheControlMaxAge: 31536000,
+    });
+    return blob.url;
+  }
+  if (process.env.VERCEL) throw new Error("BLOB_READ_WRITE_TOKEN doit être défini sur Vercel.");
   await writeFile(join(DOSSIER_PHOTOS, nom), octets);
   return `/photos/${nom}`;
 }

@@ -2,76 +2,63 @@
 
 ## En résumé
 
-Cette application **n'est pas un site statique** : elle a son propre serveur. Les signalements, les pesées
-et le mode équipe sont enregistrés dans une base **SQLite** (node:sqlite) et les photos dans des fichiers
-**JPEG sur le disque**. Elle doit donc tourner sur un **serveur Node avec un disque durable** (un VPS).
+L'application tourne sur **Vercel**. Elle a son propre serveur (fonctions Vercel) et stocke :
 
-## Pourquoi pas Vercel
+- les signalements, les pesées et les réglages dans une base **Turso** (libSQL, compatible SQLite) ;
+- les photos dans **Vercel Blob** (adresses publiques, cache long).
 
-Sur Vercel, le code s'exécute dans des fonctions temporaires dont le disque est effacé régulièrement.
-Une base SQLite et des photos écrites sur le disque y seraient perdues, et le build ne produit pas
-le format attendu par Vercel (nitro avec le preset node-server dans vite.config.ts).
+Le disque des fonctions Vercel est temporaire : sans Turso et Blob, rien ne serait conservé.
+Le code refuse donc de démarrer sur Vercel si `TURSO_DATABASE_URL` ou `BLOB_READ_WRITE_TOKEN` manque.
 
-**Conséquence :** le dépôt est relié à Vercel, donc chaque push y déclenche un build qui peut échouer.
-Ce n'est pas un défaut de l'application : Vercel n'est simplement pas la cible de ce projet.
-Erreur observée sur Vercel : STATIC_BUILD_NO_OUT_DIR (Vercel cherche un dossier statique « dist »,
-alors que ce projet produit un serveur Node dans .output).
-Les déploiements automatiques sont donc désactivés par vercel.json (git.deploymentEnabled à false).
+## Compilation
 
-## Où elle tourne
+- `vite.config.ts` choisit le preset nitro selon l'environnement : `vercel` quand la variable `VERCEL`
+  est définie (c'est le cas pendant la compilation sur Vercel), `node-server` sinon.
+- Le preset `vercel` produit `.vercel/output` (Build Output API) : Vercel le prend tel quel,
+  aucun dossier `dist` n'est attendu (c'était la cause de l'ancienne erreur STATIC_BUILD_NO_OUT_DIR).
+- `vercel.json` impose `npm ci` puis `npm run build` (le dépôt contient aussi `bun.lock` pour Lovable).
+- Tester la compilation Vercel en local : `VERCEL=1 npm run build`.
 
-Sur le serveur ubuntu-robit (DigitalOcean), qui héberge déjà d'autres services en production.
-Ce serveur a peu de mémoire (environ 1 Go au total, dont une petite partie libre). L'application est donc
-lancée dans un conteneur Docker avec une **limite de mémoire**, pour ne pas fragiliser les autres services.
+## Mise en place (une seule fois)
 
-## Architecture visée
-
-    téléphone  -- https -->  Caddy (ports 80 et 443, certificat automatique)
-                                  |
-                                  v
-                       application Node (conteneur Docker)
-                                  |
-                                  v
-                          dossier de données
-                    (eco-pikine.sqlite + dossier photos)
-
-- L'application n'est **jamais exposée directement** : seul Caddy reçoit le trafic.
-- Le **HTTPS est obligatoire** : sans lui, les téléphones bloquent l'appareil photo et la géolocalisation.
-- Le build est fait **sur un ordinateur de développement** (npm run build, environ 4 Mo dans .output),
-  puis le dossier .output est copié sur le serveur. Rien n'est compilé sur le serveur.
-
-## Réglages (variables d'environnement)
+1. **Turso** : créer une base (région proche de l'Europe/Afrique de l'Ouest, par ex. Paris ou Francfort),
+   puis récupérer son adresse `libsql://…` et créer un jeton.
+2. **Vercel → Storage** : créer un **Blob store** public et le relier au projet
+   (la variable `BLOB_READ_WRITE_TOKEN` est ajoutée automatiquement).
+3. **Vercel → Settings → Environment Variables** (environnement Production, et Preview si besoin) :
 
 | Variable | Rôle |
 | --- | --- |
-| CODE_EQUIPE | Code du mode équipe, vérifié par le serveur (obligatoire en production) |
+| TURSO_DATABASE_URL | Adresse de la base Turso (`libsql://…`) |
+| TURSO_AUTH_TOKEN | Jeton d'accès Turso |
+| BLOB_READ_WRITE_TOKEN | Ajouté par Vercel en reliant le Blob store |
+| CODE_EQUIPE | Code du mode équipe (obligatoire, autre que `scout8`) |
 | SECRET_SESSION | Clé de signature du cookie équipe (obligatoire, 32 caractères ou plus) |
-| DOSSIER_DONNEES | Dossier de la base et des photos (à sauvegarder) |
-| DONNEES_DEMO=1 | Ajoute les données de démonstration à la création de la base (à éviter en production) |
-| PORT | Port d'écoute de l'application |
+| DONNEES_DEMO=1 | Facultatif : données de démonstration à la création de la base (à éviter en production) |
 
-Les valeurs de CODE_EQUIPE et SECRET_SESSION sont dans un fichier .env **sur le serveur uniquement**
-(permissions 600). Elles ne doivent **jamais** être commitées, ni envoyées par message.
+4. Pousser sur la branche reliée (ou « Redeploy ») : les tables et le site de Bountou sont créés
+   au premier appel.
+
+Les valeurs secrètes ne sont **jamais** commitées ni envoyées par message : uniquement dans Vercel.
 
 ## Avancement
 
-- [x] Build de production vérifié en local (serveur Node autonome, réponse HTTP 200)
-- [ ] Dossiers et fichier .env créés sur le serveur
-- [ ] Choix du nom de domaine ou sous-domaine (enregistrement DNS de type A vers le serveur)
-- [ ] Envoi du dossier .output sur le serveur
-- [ ] Conteneur de l'application avec limite de mémoire et dossier de données monté à part
-- [ ] Caddy en conteneur, avec le certificat HTTPS
-- [ ] Test réel : créer un signalement avec photo depuis un téléphone, puis vérifier la base et le fichier
-- [ ] Sauvegarde régulière du dossier de données
-- [x] Désactiver les déploiements automatiques Vercel pour ce dépôt
+- [x] Stockage réécrit : Turso (libSQL) pour la base, Vercel Blob pour les photos
+- [x] Compilation Vercel vérifiée en local (`VERCEL=1 npm run build`, module natif libSQL inclus)
+- [x] Stockage testé en local (fichier SQLite) : lecture, ajout, suppression, modification, photo
+- [x] Déploiements automatiques Vercel réactivés (vercel.json)
+- [ ] Base Turso créée et variables TURSO_* ajoutées dans Vercel
+- [ ] Blob store créé et relié au projet
+- [ ] CODE_EQUIPE et SECRET_SESSION ajoutés dans Vercel
+- [ ] Test réel : créer un signalement avec photo depuis un téléphone, puis vérifier la base Turso et le Blob
 
 ## Sauvegarde
 
-Il suffit de copier DOSSIER_DONNEES : la base (avec ses fichiers -wal et -shm) et le dossier photos.
-Idéalement, arrêter l'application ou utiliser la sauvegarde SQLite pendant la copie.
+- Base : `turso db shell <base> .dump > sauvegarde.sql` (Turso garde aussi un historique restaurable).
+- Photos : elles restent dans le Blob store ; leurs adresses sont enregistrées dans la base.
 
-## Points de vigilance
+## Sans Vercel (développement ou VPS)
 
-- Surveiller la mémoire du serveur après la mise en ligne (docker stats) : elle est très juste.
-- Mettre à jour l'application = refaire le build, remplacer .output sur le serveur, redémarrer le conteneur.
-  Le dossier de données n'est pas touché.
+Sans `TURSO_DATABASE_URL` ni `BLOB_READ_WRITE_TOKEN`, l'application utilise un fichier SQLite et des photos
+JPEG sur le disque, dans `DOSSIER_DONNEES` (défaut `./donnees-serveur`), servies par `/photos/<nom>`.
+`npm run build && npm start` lance alors un serveur Node autonome.

@@ -1,6 +1,6 @@
 /**
  * Fonctions serveur (createServerFn) : appelées comme des fonctions depuis les pages,
- * elles s'exécutent sur le VPS. Toute donnée reçue est validée ici avec zod.
+ * elles s'exécutent sur le serveur (fonctions Vercel en production). Toute donnée reçue est validée ici avec zod.
  */
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
@@ -58,7 +58,7 @@ export const creerSignalementFn = createServerFn({ method: "POST" })
       photo_apres: null,
       statut: "signale",
     };
-    insererSignalement(s);
+    await insererSignalement(s);
     return s;
   });
 
@@ -96,9 +96,9 @@ const schemaPesee = z
 
 export const ajouterPeseeFn = createServerFn({ method: "POST" })
   .validator(valider(schemaPesee))
-  .handler(({ data }) => {
+  .handler(async ({ data }) => {
     exigerEquipe();
-    insererPesee({
+    await insererPesee({
       ...data,
       id: crypto.randomUUID(),
       saisi_par: data.saisi_par || "Équipe terrain",
@@ -107,9 +107,9 @@ export const ajouterPeseeFn = createServerFn({ method: "POST" })
 
 export const supprimerPeseeFn = createServerFn({ method: "POST" })
   .validator(valider(z.object({ id: z.string().min(1).max(64) })))
-  .handler(({ data }) => {
+  .handler(async ({ data }) => {
     exigerEquipe();
-    supprimerPesee(data.id);
+    await supprimerPesee(data.id);
   });
 
 // ---------- Équipe ----------
