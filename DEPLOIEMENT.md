@@ -14,7 +14,9 @@ le format attendu par Vercel (nitro avec le preset node-server dans vite.config.
 
 **Conséquence :** le dépôt est relié à Vercel, donc chaque push y déclenche un build qui peut échouer.
 Ce n'est pas un défaut de l'application : Vercel n'est simplement pas la cible de ce projet.
-Ces déploiements automatiques doivent être désactivés (voir « Avancement »).
+Erreur observée sur Vercel : STATIC_BUILD_NO_OUT_DIR (Vercel cherche un dossier statique « dist »,
+alors que ce projet produit un serveur Node dans .output).
+Les déploiements automatiques sont donc désactivés par vercel.json (git.deploymentEnabled à false).
 
 ## Où elle tourne
 
@@ -61,7 +63,7 @@ Les valeurs de CODE_EQUIPE et SECRET_SESSION sont dans un fichier .env **sur le 
 - [ ] Caddy en conteneur, avec le certificat HTTPS
 - [ ] Test réel : créer un signalement avec photo depuis un téléphone, puis vérifier la base et le fichier
 - [ ] Sauvegarde régulière du dossier de données
-- [ ] Désactiver les déploiements automatiques Vercel pour ce dépôt
+- [x] Désactiver les déploiements automatiques Vercel pour ce dépôt
 
 ## Sauvegarde
 
